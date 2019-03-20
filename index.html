@@ -17,6 +17,7 @@
     <link href="assets/css/ionicons.min.css" rel="stylesheet">
     <link href="assets/css/custom-animations.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
+    <link href="assets/css/override.css" rel="stylesheet">
 
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
@@ -36,14 +37,11 @@
 	<div id="h">
 		<div class="container">
 			<div class="row centered">
-				<h3 class="logo aligncenter">ADRESSE MAIL.pro</h3>
+				<span class="logo aligncenter"><img src="assets/img/logo.png" alt="adresse mail.pro" title="logo adresse mail.pro"/></span>
 				<h1>Votre mail pro personnalisé vous@societe.fr</h1>
 
 				<div class="col-md-6 col-md-offset-3 mt">
-					<form role="form" action="" method="post" enctype="plain">
-	    				<input type="email" name="email" class="subscribe-input" placeholder="Votre adresse mail actuelle..." required>
-						<button class='btn btn-lg btn-green subscribe-submit' type="submit">Créer mon adresse pro</button>
-					</form>
+						<a class='btn btn-lg btn-green subscribe-submit' href="#creer-mon-adresse-pro">Créer mon adresse pro</a>
 				</div>
 			</div><!--/row -->
 
@@ -203,20 +201,43 @@
 
 	<!-- ********** REGISTER SECTION ********** -->
 	<div id="g">
-		<div class="container">
+		<div id="creer-mon-adresse-pro" class="container">
 			<div class="row mt">
 				<div class="col-md-6 col-md-offset-3 centered">
-					<h2>Stay In Contact</h2>
+					<h2>Créer mon adresse</h2>
 					<hr class="aligncenter">
-					<h4>We Are Social People</h4>
+					<h4>On vous accompagne</h4>
 				</div><!-- /col-md-6-->
 			</div><!--/row -->
 
 			<div class="row">
-				<div class="col-md-6 col-md-offset-3 mt centered">
-					<form role="form" action="register.php" method="post" enctype="plain">
-	    				<input type="email" name="email" class="subscribe-input" placeholder="Enter your e-mail address..." required>
-						<button class='btn btn-lg btn-green subscribe-submit' type="submit">Subscribe</button>
+				<div class="col-md-6 col-md-offset-3 mt">
+					<form id="prospect-form" role="form" action="https://app.adressemail.pro/prospects/" method="POST" enctype="plain">
+						<div class="form-group">
+							<label for="id_name">Votre Nom&nbsp;:</label>
+							<input class="form-control" type="text" name="name" maxlength="200" required="" id="id_name" placeholder="Thierry Chutelle">
+						</div>
+						<div class="form-group">
+							<label for="id_email">Votre Email actuel&nbsp;:</label>
+							<input class="form-control" type="email" name="email" maxlength="254" required="" id="id_email"  placeholder="titi.chutelle@caramail.fr" >
+						</div>
+						<div class="form-group">
+							<label for="id_domain">Le nom de votre société&nbsp;:</label>
+							<input class="form-control" type="text" name="domain" maxlength="50" required="" id="id_domain" placeholder="Douchéo">
+						</div>
+						<div class="form-group">
+							<label for="id_required_accounts">Nombre d'email pro à créer&nbsp;:</label>
+							<input class="form-control" type="number" name="required_accounts" value="1" required="" id="id_required_accounts">
+						</div>
+						<div class="centered">
+							<button class='btn btn-lg btn-green subscribe-submit' type="submit">Envoyer</button>
+						</div>
+						<div class="success centered" style="display:none;">
+							<div class="alert alert-success" role="alert">Merci ! On vous recontacte dans les plus brefs délais</div>
+						</div>
+						<div class="error centered" style="display:none;">
+							<div class="alert alert-danger" role="alert">Un problème est survenu, n'hésitez pas à nous contacter directement sur <a href="mailto:contact@adressemail.pro">contact@adressemail.pro</a></div>
+						</div>
 					</form>
 				</div>
 			</div><!--/row -->
@@ -241,9 +262,41 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="assets/js/bootstrap.min.js"></script>
+		<!-- <script src="assets/js/jquery.min.js"></script> -->
+		<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+			integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+		<script src="assets/js/bootstrap.min.js"></script>
     <script src="assets/js/retina-1.1.0.js"></script>
-    <script src="assets/js/jquery.unveilEffects.js"></script>
+		<script src="assets/js/jquery.unveilEffects.js"></script>
+
+		<script>
+			$(document).ready(function() {
+				$("#prospect-form").submit(function (e) {
+
+					e.preventDefault(); // avoid to execute the actual submit of the form.
+					$("#prospect-form .success").hide();
+					$("#prospect-form .error").hide();
+
+					var form = $(this);
+					var url = form.attr('action');
+
+					$.ajax({
+						type: "POST",
+						url: url,
+						crossDomain: true,
+						data: form.serialize(), // serializes the form's elements.
+						success: function (data) {
+							console.log('Form success', data);
+							$("#prospect-form .success").show(200);
+						},
+						error: function (xhr, status, c) {
+							console.log(xhr.responseText);
+							console.log('Form error', xhr, '####', status, '####', c);
+							$("#prospect-form .error").show(200);
+						}
+					});
+				});
+			});
+		</script>
   </body>
 </html>

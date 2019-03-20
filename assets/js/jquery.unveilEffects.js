@@ -1,91 +1,56 @@
 /**
- * jQuery Unveil-Effects
- * - Modified version of (http://luis-almeida.github.com/unveil) to detect only when the item is in viewport
- * 
- * - Author: @geedmo
- * - URI: https://github.com/geedmo
+ * jQuery Unveil
+ * A very lightweight jQuery plugin to lazy load images
+ * http://luis-almeida.github.com/unveil
+ *
+ * Licensed under the MIT license.
+ * Copyright 2013 Luís Almeida
+ * https://github.com/luis-almeida
  */
 
-!(function($) {
+; (function ($) {
 
-  //-------------------------------
-  // Plugin definition
-  //-------------------------------
+  $.fn.unveil = function (threshold, callback) {
 
-  $.fn.unveilEffect = function(callback, threshold) {
-    var $w = $(window), th = threshold || 0, images = this, loaded, inview, source;
-    this.one('unveil.effect', callback)
+    var $w = $(window),
+      th = threshold || 0,
+      retina = window.devicePixelRatio > 1,
+      attrib = retina ? "data-src-retina" : "data-src",
+      images = this,
+      loaded;
+
+    this.one("unveil", function () {
+      var source = this.getAttribute(attrib);
+      source = source || this.getAttribute("data-src");
+      if (source) {
+        this.setAttribute("src", source);
+        if (typeof callback === "function") callback.call(this);
+      }
+    });
+
     function unveil() {
-      inview = images.filter(function() {
-        var $e = $(this), wt = $w.scrollTop(), wb = wt + $w.height(), et = $e.offset().top, eb = et + $e.height();
+      var inview = images.filter(function () {
+        var $e = $(this);
+        if ($e.is(":hidden")) return;
+
+        var wt = $w.scrollTop(),
+          wb = wt + $w.height(),
+          et = $e.offset().top,
+          eb = et + $e.height();
+
         return eb >= wt - th && et <= wb + th;
       });
-      loaded = inview.trigger("unveil.effect"); images = images.not(loaded);
+
+      loaded = inview.trigger("unveil");
+      images = images.not(loaded);
     }
-    $w.scroll(unveil).resize(unveil).load(unveil);
+
+    $w.on("scroll.unveil resize.unveil lookup.unveil", unveil);
+
+    unveil();
+
     return this;
+
   };
 
-  //-------------------------------
-  // Defaults can be override
-  //-------------------------------
-
-
-  unveilEffectSettings = $.extend({
-    
-      transitionDuration: 0.7     // seconds
-    , transitionEasing:   "ease-in-out" // css timing
-    , selector:           '[data-effect]' // animatable items selector
-    , threshold:          100    // px of the appearing elements before run animation
-
-  }, (typeof(unveilEffectSettings) != 'undefined' ? unveilEffectSettings : false));
-
-  //-------------------------------
-  // Autorstart on document ready
-  //-------------------------------
-
-  $(function() {
-
-    // transition name detection
-    $.fn.unveilEffect.transition = (function () {
-        var el = document.createElement('bs')
-
-        var transEndEventNames = {
-          'WebkitTransition' : '-webkit-transition'
-        , 'MozTransition'    : '-moz-transition'
-        , 'OTransition'      : '-o-transition'
-        , 'transition'       : '-transition'
-        }
-
-        for (var name in transEndEventNames) {
-          if (el.style[name] !== undefined) {
-            return { css: transEndEventNames[name] }
-          }
-        }
-    })();
-
-    // if no transition support, do nothing
-    if( ! $.fn.unveilEffect.transition)
-        return;
-
-    var animSelector = $(unveilEffectSettings.selector);
-
-    animSelector
-      .each(function() {
-        var $this = $(this), effectName = $this.data('effect');
-        // add effect class and force reflow
-        $this.addClass('effect-' + effectName)[0].offsetWidth;
-        $this.css($.fn.unveilEffect.transition.css,
-                   'all ' + 
-                          unveilEffectSettings.transitionDuration + 's ' +
-                          unveilEffectSettings.transitionEasing)
-      })
-      .unveilEffect(function() {
-          // activate animation
-          $(this).addClass('in')
-
-      }, (- unveilEffectSettings.threshold) )
-
-  })
-
-})(window.jQuery);
+})(window.jQuery || window.Zepto);
